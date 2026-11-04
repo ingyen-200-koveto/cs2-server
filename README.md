@@ -13,7 +13,7 @@ a Steamről tölti le.
 |---|---|---|
 | `metamod` | Metamod:Source | 2.0.0-git1469 |
 | `counterstrikesharp` | CounterStrikeSharp, .NET-tel együtt | 1.0.378 |
-| `counterstrikesharp/plugins/UzemBacsi` | saját plugin: bhop, ejtőernyő, shotgun tiltás, hirdetés, párbaj | 1.1.0 |
+| `counterstrikesharp/plugins/UzemBacsi` | saját plugin: bhop, ejtőernyő, shotgun tiltás, hirdetés, párbaj, max 6 játékos, botok nélkül | 1.2.0 |
 | `counterstrikesharp/plugins/WeaponPaints` | skinek (`!ws`, `!skins`, `!knife`...), magyar szövegekkel | build-466 |
 | `counterstrikesharp/plugins/MenuManagerCore` + `PlayerSettings` + `shared/AnyBaseLib` | a menükhöz kellenek | 1.4.1 / 0.9.4 / 0.9.4 |
 | `counterstrikesharp/plugins/CS2-SimpleAdmin` | admin parancsok (`!admin`, `!kick`, `!ban`, `!map`...) | 1.9.1 |
@@ -33,6 +33,8 @@ A repóban csak olyan fájl van, amihez a szerver futás közben nem nyúl. A pl
 - **Párbaj:** ha egy CT és egy T marad életben, a chat szól. Ha bármelyikük késsel üt (megkéseli a falat),
   indul a párbaj: mindkettőtől elveszi a fegyvereket, kapnak egy USP-t és 100 HP-t, és csak a fejlövés sebez.
   Más fegyvert nem vehetnek fel. Bemelegítéskor és lerakott bombánál nincs párbaj. A kör végén minden visszaáll.
+- **Max 6 játékos:** a 7. belépőt kirúgja („A szerver tele van”). Aki `@css/reservation` jogot kapott (VIP), az beléphet.
+- **Botok nélkül**, és a meccs végén ugyanazon a pályán indul újra (workshop pályán is).
 
 Beállítások: `game/csgo/addons/counterstrikesharp/configs/plugins/UzemBacsi/UzemBacsi.json`
 
@@ -49,6 +51,9 @@ Beállítások: `game/csgo/addons/counterstrikesharp/configs/plugins/UzemBacsi/U
 | `Parbaj.Bekapcsolva` | `true` | párbaj be/ki |
 | `Parbaj.Fegyver` | `weapon_usp_silencer` | a párbaj fegyvere |
 | `Parbaj.CsakFejloves` | `true` | csak a fejlövés sebez a párbajban |
+| `MaxJatekos` | `6` | ennyi ember lehet fent egyszerre (`0` = nincs limit) |
+| `Botok` | `false` | `true`-val maradhatnak a botok |
+| `MeccsVegenUgyanazAPalya` | `true` | a meccs végén nem vált pályát |
 
 Színek: `{lime}`, `{lightblue}`, `{red}`, `{green}`, `{gold}`, `{default}`...
 

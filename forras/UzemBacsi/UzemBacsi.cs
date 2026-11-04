@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Admin;
 using CounterStrikeSharp.API.Modules.Cvars;
 using CounterStrikeSharp.API.Modules.Timers;
 using CounterStrikeSharp.API.Modules.Utils;
@@ -47,12 +48,15 @@ public class UzemConfig : BasePluginConfig
     };
     [JsonPropertyName("Hirdetes")] public AdsConfig Ads { get; set; } = new();
     [JsonPropertyName("Parbaj")] public DuelConfig Duel { get; set; } = new();
+    [JsonPropertyName("MaxJatekos")] public int MaxPlayers { get; set; } = 6;
+    [JsonPropertyName("Botok")] public bool Bots { get; set; } = false;
+    [JsonPropertyName("MeccsVegenUgyanazAPalya")] public bool KeepMap { get; set; } = true;
 }
 
 public class UzemBacsi : BasePlugin, IPluginConfig<UzemConfig>
 {
     public override string ModuleName => "UzemBacsi";
-    public override string ModuleVersion => "1.1.0";
+    public override string ModuleVersion => "1.2.0";
     public override string ModuleAuthor => "Üzem-Bácsi";
 
     public UzemConfig Config { get; set; } = new();
@@ -89,6 +93,7 @@ public class UzemBacsi : BasePlugin, IPluginConfig<UzemConfig>
         RegisterEventHandler<EventPlayerDeath>(OnPlayerDeath);
         RegisterEventHandler<EventWeaponFire>(OnWeaponFire);
         RegisterEventHandler<EventItemPickup>(OnItemPickup);
+        RegisterEventHandler<EventPlayerConnectFull>(OnConnectFull);
         RegisterEventHandler<EventItemPurchase>(OnItemPurchase);
 
         StartAds();
@@ -139,6 +144,22 @@ public class UzemBacsi : BasePlugin, IPluginConfig<UzemConfig>
             SetCvar("sv_staminalandcost", "0");
         }
 
+        if (Config.MaxPlayers > 0)
+            Server.ExecuteCommand($"sv_visiblemaxplayers {Config.MaxPlayers}");
+
+        if (!Config.Bots)
+        {
+            Server.ExecuteCommand("bot_quota_mode normal");
+            Server.ExecuteCommand("bot_quota 0");
+            Server.ExecuteCommand("bot_kick");
+        }
+
+        if (Config.KeepMap)
+        {
+            Server.ExecuteCommand("mp_match_end_restart 1");
+            Server.ExecuteCommand("mp_match_end_changelevel 0");
+        }
+
         var banned = Config.BannedWeapons
             .Where(w => Shotguns.ContainsKey(w))
             .Select(w => Shotguns[w].Index.ToString());
@@ -165,6 +186,23 @@ public class UzemBacsi : BasePlugin, IPluginConfig<UzemConfig>
             }
             player.PrintToChat($" {Colors(Config.Prefix)} A shotgunok tiltva vannak ezen a szerveren.");
         });
+        return HookResult.Continue;
+    }
+
+    private HookResult OnConnectFull(EventPlayerConnectFull ev, GameEventInfo info)
+    {
+        var player = ev.Userid;
+        if (Config.MaxPlayers <= 0 || player == null || !player.IsValid || player.IsBot || player.IsHLTV)
+            return HookResult.Continue;
+
+        int humans = Utilities.GetPlayers().Count(p => p.IsValid && !p.IsBot && !p.IsHLTV
+            && p.Connected == PlayerConnectedState.Connected);
+        if (humans <= Config.MaxPlayers) return HookResult.Continue;
+        if (AdminManager.PlayerHasPermissions(player, "@css/reservation")) return HookResult.Continue;
+
+        var userId = player.UserId;
+        Server.NextFrame(() =>
+            Server.ExecuteCommand($"kickid {userId} \"A szerver tele van (max {Config.MaxPlayers} jatekos).\""));
         return HookResult.Continue;
     }
 
