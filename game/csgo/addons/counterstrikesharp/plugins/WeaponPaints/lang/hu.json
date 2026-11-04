@@ -1,0 +1,30 @@
+{
+	"wp_prefix": "{lightblue}[Üzem-Bácsi] {default}",
+	"wp_info_website": "Skinek: {lime}{0}{default} | frissítés: {lime}!wp",
+	"wp_info_refresh": "",
+	"wp_info_knife": "",
+	"wp_info_glove": "",
+	"wp_info_agent": "",
+	"wp_info_music": "",
+	"wp_info_pin": "",
+	"wp_command_cooldown": "{lightred}Várj egy kicsit, mielőtt újra frissítesz",
+	"wp_command_refresh_done": "{lime}Skinek frissítve",
+	"wp_knife_menu_select": "Kés: {lime}{0}",
+	"wp_knife_menu_kill": "",
+	"wp_knife_menu_title": "Kések",
+	"wp_glove_menu_select": "Kesztyű: {lime}{0}",
+	"wp_glove_menu_title": "Kesztyűk",
+	"wp_agent_menu_select": "Ügynök: {lime}{0}",
+	"wp_agent_menu_title": "Ügynökök",
+	"wp_music_menu_title": "Zenekészletek",
+	"wp_music_menu_select": "Zenekészlet: {lime}{0}",
+	"wp_pins_menu_title": "Kitűzők",
+	"wp_pins_menu_select": "Kitűző: {lime}{0}",
+	"wp_skin_menu_weapon_title": "Fegyverek",
+	"wp_skin_menu_skin_title": "Skin ehhez: {lime}{0}",
+	"wp_skin_menu_select": "Skin: {lime}{0}",
+
+	"wp_stattrak_action": "StatTrak beállítás módosítva",
+
+	"None": "Nincs"
+}
