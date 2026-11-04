@@ -104,12 +104,8 @@ public partial class UzemBacsi
             var a = TouchStats(attacker!);
             if (a != null)
             {
-                var before = RankOf(Points(a));
                 a.Kills++;
                 if (ev.Headshot) a.Headshots++;
-                var after = RankOf(Points(a));
-                if (after.Points > before.Points)
-                    Say($"{{lime}}{attacker!.PlayerName}{{default}} elérte a(z) {{gold}}{after.Name}{{default}} rangot!");
             }
         }
 
