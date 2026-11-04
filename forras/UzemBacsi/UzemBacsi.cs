@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Admin;
@@ -8,55 +7,10 @@ using CounterStrikeSharp.API.Modules.Utils;
 
 namespace UzemBacsi;
 
-public class BhopConfig
-{
-    [JsonPropertyName("Bekapcsolva")] public bool Enabled { get; set; } = true;
-    [JsonPropertyName("SebessegLimitNelkul")] public bool Unlimited { get; set; } = false;
-}
-
-public class ParachuteConfig
-{
-    [JsonPropertyName("Bekapcsolva")] public bool Enabled { get; set; } = true;
-    [JsonPropertyName("EsesiSebesseg")] public float FallSpeed { get; set; } = 150f;
-}
-
-public class AdsConfig
-{
-    [JsonPropertyName("Bekapcsolva")] public bool Enabled { get; set; } = true;
-    [JsonPropertyName("PercenkentEgyszer")] public float Minutes { get; set; } = 10f;
-    [JsonPropertyName("Uzenetek")] public List<string> Messages { get; set; } = new()
-    {
-        "Discord: {lime}https://discord.gg/T7u8TYJapR"
-    };
-}
-
-public class DuelConfig
-{
-    [JsonPropertyName("Bekapcsolva")] public bool Enabled { get; set; } = true;
-    [JsonPropertyName("Fegyver")] public string Weapon { get; set; } = "weapon_usp_silencer";
-    [JsonPropertyName("CsakFejloves")] public bool HeadshotOnly { get; set; } = true;
-}
-
-public class UzemConfig : BasePluginConfig
-{
-    [JsonPropertyName("Elotag")] public string Prefix { get; set; } = "{lightblue}[Üzem-Bácsi]{default}";
-    [JsonPropertyName("Bhop")] public BhopConfig Bhop { get; set; } = new();
-    [JsonPropertyName("Ejtoernyo")] public ParachuteConfig Parachute { get; set; } = new();
-    [JsonPropertyName("TiltottFegyverek")] public List<string> BannedWeapons { get; set; } = new()
-    {
-        "weapon_nova", "weapon_xm1014", "weapon_sawedoff", "weapon_mag7"
-    };
-    [JsonPropertyName("Hirdetes")] public AdsConfig Ads { get; set; } = new();
-    [JsonPropertyName("Parbaj")] public DuelConfig Duel { get; set; } = new();
-    [JsonPropertyName("MaxJatekos")] public int MaxPlayers { get; set; } = 6;
-    [JsonPropertyName("Botok")] public bool Bots { get; set; } = false;
-    [JsonPropertyName("MeccsVegenUgyanazAPalya")] public bool KeepMap { get; set; } = true;
-}
-
-public class UzemBacsi : BasePlugin, IPluginConfig<UzemConfig>
+public partial class UzemBacsi : BasePlugin, IPluginConfig<UzemConfig>
 {
     public override string ModuleName => "UzemBacsi";
-    public override string ModuleVersion => "1.2.0";
+    public override string ModuleVersion => "1.3.0";
     public override string ModuleAuthor => "Üzem-Bácsi";
 
     public UzemConfig Config { get; set; } = new();
@@ -69,12 +23,8 @@ public class UzemBacsi : BasePlugin, IPluginConfig<UzemConfig>
         ["weapon_nova"] = (35, 1050),
     };
 
-    private const PlayerFlags OnGround = PlayerFlags.FL_ONGROUND;
     private int _nextAd;
     private CounterStrikeSharp.API.Modules.Timers.Timer? _adTimer;
-    private bool _duelActive;
-    private bool _duelAnnounced;
-    private bool _bombPlanted;
 
     public void OnConfigParsed(UzemConfig config)
     {
@@ -85,19 +35,53 @@ public class UzemBacsi : BasePlugin, IPluginConfig<UzemConfig>
 
     public override void Load(bool hotReload)
     {
+        LoadStats();
+
         RegisterListener<Listeners.OnMapStart>(_ => AddTimer(3.0f, ApplyCvars, TimerFlags.STOP_ON_MAPCHANGE));
+        RegisterListener<Listeners.OnMapEnd>(SaveStats);
         RegisterListener<Listeners.OnTick>(ParachuteTick);
-        RegisterEventHandler<EventRoundStart>((_, _) => { ResetDuel(); ApplyCvars(); return HookResult.Continue; });
-        RegisterEventHandler<EventRoundEnd>((_, _) => { ResetDuel(); return HookResult.Continue; });
-        RegisterEventHandler<EventBombPlanted>((_, _) => { _bombPlanted = true; return HookResult.Continue; });
-        RegisterEventHandler<EventPlayerDeath>(OnPlayerDeath);
-        RegisterEventHandler<EventWeaponFire>(OnWeaponFire);
-        RegisterEventHandler<EventItemPickup>(OnItemPickup);
-        RegisterEventHandler<EventPlayerConnectFull>(OnConnectFull);
+
+        RegisterEventHandler<EventRoundStart>((_, _) => { ResetRoundDamage(); ApplyCvars(); return HookResult.Continue; });
+        RegisterEventHandler<EventRoundEnd>((_, _) => { SaveStats(); return HookResult.Continue; });
         RegisterEventHandler<EventItemPurchase>(OnItemPurchase);
+        RegisterEventHandler<EventPlayerConnectFull>(OnConnectFull);
+        RegisterEventHandler<EventPlayerSpawn>(OnSpawn);
+        RegisterEventHandler<EventPlayerHurt>(OnPlayerHurt);
+        RegisterEventHandler<EventPlayerDeath>(OnPlayerDeath);
+
+        AddCommandListener("say", OnSay);
+        AddCommandListener("say_team", OnSayTeam);
+
+        AddCommand("css_dc", "Discord link", (p, _) => { if (p != null) Tell(p, $"Discord: {{lime}}{Config.Discord}"); });
+        AddCommand("css_discord", "Discord link", (p, _) => { if (p != null) Tell(p, $"Discord: {{lime}}{Config.Discord}"); });
+        AddCommand("css_rs", "Pontszám nullázása", OnResetScore);
+        AddCommand("css_rank", "Saját rang", OnRank);
+        AddCommand("css_top", "Toplista", OnTop);
 
         StartAds();
         ApplyCvars();
+    }
+
+    public override void Unload(bool hotReload) => SaveStats();
+
+    // ---------- üzenetek ----------
+
+    private void Say(string text) => Server.PrintToChatAll($" {Colors(Config.Prefix)} {Colors(text)}");
+
+    private void Tell(CCSPlayerController p, string text)
+    {
+        if (p.IsValid) p.PrintToChat($" {Colors(Config.Prefix)} {Colors(text)}");
+    }
+
+    private static string Colors(string s)
+    {
+        foreach (var f in typeof(ChatColors).GetFields())
+        {
+            var v = f.GetValue(null);
+            if (v is not char && v is not string) continue;
+            s = s.Replace("{" + f.Name + "}", v.ToString(), StringComparison.OrdinalIgnoreCase);
+        }
+        return s;
     }
 
     private void StartAds()
@@ -111,20 +95,7 @@ public class UzemBacsi : BasePlugin, IPluginConfig<UzemConfig>
         }, TimerFlags.REPEAT);
     }
 
-    private void Say(string text)
-    {
-        Server.PrintToChatAll($" {Colors(Config.Prefix)} {Colors(text)}");
-    }
-
-    private static string Colors(string s)
-    {
-        foreach (var f in typeof(ChatColors).GetFields())
-        {
-            if (f.GetValue(null) is not char c && f.GetValue(null) is not string) continue;
-            s = s.Replace("{" + f.Name + "}", f.GetValue(null)!.ToString(), StringComparison.OrdinalIgnoreCase);
-        }
-        return s;
-    }
+    // ---------- szerver beállítások ----------
 
     private static void SetCvar(string name, string value)
     {
@@ -166,6 +137,48 @@ public class UzemBacsi : BasePlugin, IPluginConfig<UzemConfig>
         Server.ExecuteCommand($"mp_items_prohibited \"{string.Join(",", banned)}\"");
     }
 
+    private static bool IsWarmup()
+    {
+        var proxy = Utilities.FindAllEntitiesByDesignerName<CCSGameRulesProxy>("cs_gamerules").FirstOrDefault();
+        return proxy?.GameRules?.WarmupPeriod ?? false;
+    }
+
+    private static bool IsHuman(CCSPlayerController? p) => p != null && p.IsValid && !p.IsBot && !p.IsHLTV;
+
+    // ---------- belépés, limit, üdvözlés ----------
+
+    private HookResult OnConnectFull(EventPlayerConnectFull ev, GameEventInfo info)
+    {
+        var player = ev.Userid;
+        if (!IsHuman(player)) return HookResult.Continue;
+
+        if (Config.MaxPlayers > 0)
+        {
+            int humans = Utilities.GetPlayers().Count(p => IsHuman(p) && p.Connected == PlayerConnectedState.Connected);
+            if (humans > Config.MaxPlayers && !AdminManager.PlayerHasPermissions(player, "@css/reservation"))
+            {
+                var userId = player!.UserId;
+                Server.NextFrame(() =>
+                    Server.ExecuteCommand($"kickid {userId} \"A szerver tele van (max {Config.MaxPlayers} jatekos).\""));
+                return HookResult.Continue;
+            }
+        }
+
+        TouchStats(player!);
+
+        if (Config.Welcome.Enabled)
+        {
+            var name = player!.PlayerName;
+            AddTimer(3.0f, () =>
+            {
+                if (player.IsValid) Tell(player, Config.Welcome.Message.Replace("{nev}", name));
+            });
+        }
+        return HookResult.Continue;
+    }
+
+    // ---------- shotgun tiltás ----------
+
     private HookResult OnItemPurchase(EventItemPurchase ev, GameEventInfo info)
     {
         var player = ev.Userid;
@@ -184,115 +197,12 @@ public class UzemBacsi : BasePlugin, IPluginConfig<UzemConfig>
                 money.Account += s.Price;
                 Utilities.SetStateChanged(player, "CCSPlayerController", "m_pInGameMoneyServices");
             }
-            player.PrintToChat($" {Colors(Config.Prefix)} A shotgunok tiltva vannak ezen a szerveren.");
+            Tell(player, "A shotgunok tiltva vannak ezen a szerveren.");
         });
         return HookResult.Continue;
     }
 
-    private HookResult OnConnectFull(EventPlayerConnectFull ev, GameEventInfo info)
-    {
-        var player = ev.Userid;
-        if (Config.MaxPlayers <= 0 || player == null || !player.IsValid || player.IsBot || player.IsHLTV)
-            return HookResult.Continue;
-
-        int humans = Utilities.GetPlayers().Count(p => p.IsValid && !p.IsBot && !p.IsHLTV
-            && p.Connected == PlayerConnectedState.Connected);
-        if (humans <= Config.MaxPlayers) return HookResult.Continue;
-        if (AdminManager.PlayerHasPermissions(player, "@css/reservation")) return HookResult.Continue;
-
-        var userId = player.UserId;
-        Server.NextFrame(() =>
-            Server.ExecuteCommand($"kickid {userId} \"A szerver tele van (max {Config.MaxPlayers} jatekos).\""));
-        return HookResult.Continue;
-    }
-
-    private static bool IsWarmup()
-    {
-        var proxy = Utilities.FindAllEntitiesByDesignerName<CCSGameRulesProxy>("cs_gamerules").FirstOrDefault();
-        return proxy?.GameRules?.WarmupPeriod ?? false;
-    }
-
-    private static List<CCSPlayerController> Alive(CsTeam team) =>
-        Utilities.GetPlayers()
-            .Where(p => p.IsValid && p.PawnIsAlive && p.Team == team)
-            .ToList();
-
-    private bool DuelPossible(out CCSPlayerController? ct, out CCSPlayerController? t)
-    {
-        ct = null; t = null;
-        if (!Config.Duel.Enabled || _duelActive || _bombPlanted || IsWarmup()) return false;
-        var cts = Alive(CsTeam.CounterTerrorist);
-        var ts = Alive(CsTeam.Terrorist);
-        if (cts.Count != 1 || ts.Count != 1) return false;
-        ct = cts[0]; t = ts[0];
-        return true;
-    }
-
-    private HookResult OnPlayerDeath(EventPlayerDeath ev, GameEventInfo info)
-    {
-        Server.NextFrame(() =>
-        {
-            if (_duelAnnounced || !DuelPossible(out var ct, out var t)) return;
-            _duelAnnounced = true;
-            Say($"{{gold}}1v1!{{default}} {ct!.PlayerName} vs {t!.PlayerName}. Késeld meg a falat, és párbaj lesz: {{lime}}csak USP, csak fejlövés!");
-        });
-        return HookResult.Continue;
-    }
-
-    private HookResult OnWeaponFire(EventWeaponFire ev, GameEventInfo info)
-    {
-        var weapon = ev.Weapon ?? "";
-        if (!weapon.Contains("knife") && !weapon.Contains("bayonet")) return HookResult.Continue;
-        if (!DuelPossible(out var ct, out var t)) return HookResult.Continue;
-        var starter = ev.Userid;
-        if (starter == null || (starter != ct && starter != t)) return HookResult.Continue;
-
-        Server.NextFrame(() => StartDuel(ct!, t!, starter));
-        return HookResult.Continue;
-    }
-
-    private void StartDuel(CCSPlayerController ct, CCSPlayerController t, CCSPlayerController starter)
-    {
-        if (_duelActive || !ct.IsValid || !t.IsValid || !ct.PawnIsAlive || !t.PawnIsAlive) return;
-        _duelActive = true;
-
-        if (Config.Duel.HeadshotOnly) Server.ExecuteCommand("mp_damage_headshot_only 1");
-
-        foreach (var p in new[] { ct, t })
-        {
-            p.RemoveWeapons();
-            p.GiveNamedItem(Config.Duel.Weapon);
-            var pawn = p.PlayerPawn.Value;
-            if (pawn != null && pawn.IsValid)
-            {
-                pawn.Health = 100;
-                Utilities.SetStateChanged(pawn, "CBaseEntity", "m_iHealth");
-            }
-        }
-
-        Say($"{{red}}PÁRBAJ!{{default}} {starter.PlayerName} megkéselte a falat. {ct.PlayerName} vs {t.PlayerName}: {{lime}}csak USP, csak fejlövés!");
-    }
-
-    private HookResult OnItemPickup(EventItemPickup ev, GameEventInfo info)
-    {
-        if (!_duelActive) return HookResult.Continue;
-        var player = ev.Userid;
-        var item = "weapon_" + (ev.Item ?? "");
-        if (player == null || !player.IsValid || item == Config.Duel.Weapon) return HookResult.Continue;
-        Server.NextFrame(() =>
-        {
-            if (player.IsValid && player.PawnIsAlive) player.RemoveItemByDesignerName(item);
-        });
-        return HookResult.Continue;
-    }
-
-    private void ResetDuel()
-    {
-        if (Config.Duel.HeadshotOnly) Server.ExecuteCommand("mp_damage_headshot_only 0");
-        _duelActive = false;
-        _duelAnnounced = false;
-        _bombPlanted = false;
-    }
+    // ---------- ejtőernyő ----------
 
     private void ParachuteTick()
     {
@@ -306,7 +216,7 @@ public class UzemBacsi : BasePlugin, IPluginConfig<UzemConfig>
 
             var pawn = player.PlayerPawn.Value;
             if (pawn == null || !pawn.IsValid) continue;
-            if ((pawn.Flags & (uint)OnGround) != 0) continue;
+            if ((pawn.Flags & (uint)PlayerFlags.FL_ONGROUND) != 0) continue;
             if (pawn.MoveType == MoveType_t.MOVETYPE_LADDER || pawn.MoveType == MoveType_t.MOVETYPE_NOCLIP) continue;
 
             var vel = pawn.AbsVelocity;
