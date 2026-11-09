@@ -72,6 +72,13 @@ public class StatsConfig
     };
 }
 
+public class DefuseConfig
+{
+    [JsonPropertyName("CsakHaNincsTerrorista")] public bool OnlyWhenNoT { get; set; } = true;
+    [JsonPropertyName("MaxTavolsag")] public float MaxDistance { get; set; } = 100f;
+    [JsonPropertyName("AutomatikusHaNincsTerrorista")] public bool AutoWhenNoT { get; set; } = true;
+}
+
 public class UzemConfig : BasePluginConfig
 {
     [JsonPropertyName("Elotag")] public string Prefix { get; set; } = "{lightblue}[Üzem-Bácsi]{default}";
@@ -87,6 +94,7 @@ public class UzemConfig : BasePluginConfig
     [JsonPropertyName("Sebzes")] public DamageConfig Damage { get; set; } = new();
     [JsonPropertyName("Cimkek")] public TagConfig Tags { get; set; } = new();
     [JsonPropertyName("Statisztika")] public StatsConfig Stats { get; set; } = new();
+    [JsonPropertyName("Hatastalanitas")] public DefuseConfig Defuse { get; set; } = new();
     [JsonPropertyName("MaxJatekos")] public int MaxPlayers { get; set; } = 6;
     [JsonPropertyName("Botok")] public bool Bots { get; set; } = false;
     [JsonPropertyName("MeccsVegenUgyanazAPalya")] public bool KeepMap { get; set; } = true;

@@ -13,7 +13,7 @@ a Steamről tölti le.
 |---|---|---|
 | `metamod` | Metamod:Source | 2.0.0-git1469 |
 | `counterstrikesharp` | CounterStrikeSharp, .NET-tel együtt | 1.0.378 |
-| `counterstrikesharp/plugins/UzemBacsi` | saját plugin: bhop, ejtőernyő, shotgun tiltás, hirdetés, rang, sebzés, chat tagek, max 6 játékos | 1.3.1 |
+| `counterstrikesharp/plugins/UzemBacsi` | saját plugin: bhop, ejtőernyő, shotgun tiltás, hirdetés, rang, sebzés, chat tagek, !def, !norecoil, max 6 játékos | 1.4.0 |
 | `counterstrikesharp/plugins/WeaponPaints` | skinek (`!ws`, `!skins`, `!knife`...), magyar szövegekkel | build-466 |
 | `counterstrikesharp/plugins/MenuManagerCore` + `PlayerSettings` + `shared/AnyBaseLib` | a menükhöz kellenek | 1.4.1 / 0.9.4 / 0.9.4 |
 | `counterstrikesharp/plugins/CS2-SimpleAdmin` | admin parancsok (`!admin`, `!kick`, `!ban`, `!map`...) | 1.9.1 |
@@ -37,6 +37,10 @@ A repóban csak olyan fájl van, amihez a szerver futás közben nem nyúl. A pl
   Ezüst (300), Arany (600), Platina (1000), Gyémánt (1600), Legenda (2500).
   Az adatok itt vannak: `configs/plugins/UzemBacsi/statisztika.json`.
 - **Parancsok:** `!rank` (saját rang), `!top` (top 5), `!rs` (meccsbeli pontok nullázása), `!dc` (Discord link).
+  A parancsok nem látszanak a chatben (a `core.json`-ban a `!` csendes trigger).
+- **`!def`:** CT-ként a bomba mellett (max 100 egység) azonnal hatástalanít, ha már nincs élő terrorista.
+  Ha nincs élő T, az E-vel kezdett hatástalanítás is azonnal kész.
+- **`!norecoil` (csak admin):** mindenkinek ki/be kapcsolja a fegyverek visszarúgását.
 - **Admin és VIP tag:** a chatben `[ADMIN]` (piros) vagy `[VIP]` (arany) a név előtt, és a pontozótáblán is.
   Admin: aki `@css/generic` vagy `@css/root` jogot kapott. VIP: `@css/vip` vagy `@css/reservation`.
 - **Max 6 játékos:** a 7. belépőt kirúgja („A szerver tele van”). Aki `@css/reservation` jogot kapott (VIP), az beléphet.
@@ -60,6 +64,8 @@ Beállítások: `game/csgo/addons/counterstrikesharp/configs/plugins/UzemBacsi/U
 | `Sebzes.OsszesitesHalalUtan` | `true` | a halál utáni összesítő be/ki |
 | `Cimkek.Admin` / `Cimkek.Vip` | `[ADMIN]` / `[VIP]` | a chat tagek |
 | `Statisztika.Rangok` | lásd fent | a rangok neve és ponthatára |
+| `Hatastalanitas.CsakHaNincsTerrorista` | `true` | `false`-ra állítva a `!def` élő T mellett is megy |
+| `Hatastalanitas.AutomatikusHaNincsTerrorista` | `true` | élő T nélkül az E-s hatástalanítás azonnali |
 | `MaxJatekos` | `6` | ennyi ember lehet fent egyszerre (`0` = nincs limit) |
 | `Botok` | `false` | `true`-val maradhatnak a botok |
 | `MeccsVegenUgyanazAPalya` | `true` | a meccs végén nem vált pályát |

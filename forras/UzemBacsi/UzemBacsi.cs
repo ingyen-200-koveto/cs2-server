@@ -10,7 +10,7 @@ namespace UzemBacsi;
 public partial class UzemBacsi : BasePlugin, IPluginConfig<UzemConfig>
 {
     public override string ModuleName => "UzemBacsi";
-    public override string ModuleVersion => "1.3.1";
+    public override string ModuleVersion => "1.4.0";
     public override string ModuleAuthor => "Üzem-Bácsi";
 
     public UzemConfig Config { get; set; } = new();
@@ -57,6 +57,9 @@ public partial class UzemBacsi : BasePlugin, IPluginConfig<UzemConfig>
         AddCommand("css_rs", "Pontszám nullázása", OnResetScore);
         AddCommand("css_rank", "Saját rang", OnRank);
         AddCommand("css_top", "Toplista", OnTop);
+        AddCommand("css_def", "Azonnali hatástalanítás", OnDefuse);
+        AddCommand("css_norecoil", "Visszarúgás ki/be (admin)", OnNoRecoil);
+        RegisterEventHandler<EventBombBegindefuse>(OnBeginDefuse);
 
         StartAds();
         ApplyCvars();
@@ -130,6 +133,8 @@ public partial class UzemBacsi : BasePlugin, IPluginConfig<UzemConfig>
             Server.ExecuteCommand("mp_match_end_restart 1");
             Server.ExecuteCommand("mp_match_end_changelevel 0");
         }
+
+        ApplyRecoil();
 
         var banned = Config.BannedWeapons
             .Where(w => Shotguns.ContainsKey(w))
