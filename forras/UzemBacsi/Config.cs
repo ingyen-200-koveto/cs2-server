@@ -74,7 +74,7 @@ public class StatsConfig
 
 public class DefuseConfig
 {
-    [JsonPropertyName("CsakHaNincsTerrorista")] public bool OnlyWhenNoT { get; set; } = true;
+    [JsonPropertyName("CsakHaNincsTerrorista")] public bool OnlyWhenNoT { get; set; } = false;
     [JsonPropertyName("MaxTavolsag")] public float MaxDistance { get; set; } = 100f;
     [JsonPropertyName("AutomatikusHaNincsTerrorista")] public bool AutoWhenNoT { get; set; } = true;
 }

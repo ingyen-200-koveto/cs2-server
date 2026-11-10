@@ -13,7 +13,7 @@ a Steamről tölti le.
 |---|---|---|
 | `metamod` | Metamod:Source | 2.0.0-git1469 |
 | `counterstrikesharp` | CounterStrikeSharp, .NET-tel együtt | 1.0.378 |
-| `counterstrikesharp/plugins/UzemBacsi` | saját plugin: bhop, ejtőernyő, shotgun tiltás, hirdetés, rang, sebzés, chat tagek, !def, !norecoil, injekció sorozatért, pályaszavazás, max 6 játékos | 1.6.0 |
+| `counterstrikesharp/plugins/UzemBacsi` | saját plugin: bhop, ejtőernyő, shotgun tiltás, hirdetés, rang, sebzés, chat tagek, !def, !norecoil, injekció sorozatért, pályaszavazás, max 6 játékos | 1.6.1 |
 | `counterstrikesharp/plugins/WeaponPaints` | skinek (`!ws`, `!skins`, `!knife`...), magyar szövegekkel | build-466 |
 | `counterstrikesharp/plugins/MenuManagerCore` + `PlayerSettings` + `shared/AnyBaseLib` | a menükhöz kellenek | 1.4.1 / 0.9.4 / 0.9.4 |
 | `counterstrikesharp/plugins/CS2-SimpleAdmin` | admin parancsok (`!admin`, `!kick`, `!ban`, `!map`...) | 1.9.1 |
@@ -38,7 +38,7 @@ A repóban csak olyan fájl van, amihez a szerver futás közben nem nyúl. A pl
   Az adatok itt vannak: `configs/plugins/UzemBacsi/statisztika.json`.
 - **Parancsok:** `!rank` (saját rang), `!top` (top 5), `!rs` (meccsbeli pontok nullázása), `!dc` (Discord link).
   A parancsok nem látszanak a chatben (a `core.json`-ban a `!` csendes trigger).
-- **`!def`:** CT-ként a bomba mellett (max 100 egység) azonnal hatástalanít, ha már nincs élő terrorista.
+- **`!def`:** CT-ként a bomba mellett (max 100 egység) bármikor azonnal hatástalanít.
   Ha nincs élő T, az E-vel kezdett hatástalanítás is azonnal kész.
 - **Injekció:** 4 ölés halál nélkül = egy injekció (healthshot), aztán minden további 4 után újabb.
 - **Pályaszavazás:** Mirage, Dust II, Inferno, Nuke, Ancient, Anubis, Cache. A meccs végén automatikusan indul,
@@ -68,7 +68,7 @@ Beállítások: `game/csgo/addons/counterstrikesharp/configs/plugins/UzemBacsi/U
 | `Sebzes.OsszesitesHalalUtan` | `true` | a halál utáni összesítő be/ki |
 | `Cimkek.Admin` / `Cimkek.Vip` | `[ADMIN]` / `[VIP]` | a chat tagek |
 | `Statisztika.Rangok` | lásd fent | a rangok neve és ponthatára |
-| `Hatastalanitas.CsakHaNincsTerrorista` | `true` | `false`-ra állítva a `!def` élő T mellett is megy |
+| `Hatastalanitas.CsakHaNincsTerrorista` | `false` | `true`-ra állítva a `!def` csak élő T nélkül megy |
 | `Hatastalanitas.AutomatikusHaNincsTerrorista` | `true` | élő T nélkül az E-s hatástalanítás azonnali |
 | `Sorozat.OlesekSzama` | `4` | ennyi ölés kell halál nélkül az injekcióhoz |
 | `Sorozat.Jutalom` | `weapon_healthshot` | mit kapjon (bármilyen fegyvernév, pl. `weapon_hegrenade`) |
