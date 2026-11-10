@@ -79,6 +79,13 @@ public class DefuseConfig
     [JsonPropertyName("AutomatikusHaNincsTerrorista")] public bool AutoWhenNoT { get; set; } = true;
 }
 
+public class StreakConfig
+{
+    [JsonPropertyName("Bekapcsolva")] public bool Enabled { get; set; } = true;
+    [JsonPropertyName("OlesekSzama")] public int Kills { get; set; } = 4;
+    [JsonPropertyName("Jutalom")] public string Reward { get; set; } = "weapon_healthshot";
+}
+
 public class UzemConfig : BasePluginConfig
 {
     [JsonPropertyName("Elotag")] public string Prefix { get; set; } = "{lightblue}[Üzem-Bácsi]{default}";
@@ -94,6 +101,7 @@ public class UzemConfig : BasePluginConfig
     [JsonPropertyName("Sebzes")] public DamageConfig Damage { get; set; } = new();
     [JsonPropertyName("Cimkek")] public TagConfig Tags { get; set; } = new();
     [JsonPropertyName("Statisztika")] public StatsConfig Stats { get; set; } = new();
+    [JsonPropertyName("Sorozat")] public StreakConfig Streak { get; set; } = new();
     [JsonPropertyName("Hatastalanitas")] public DefuseConfig Defuse { get; set; } = new();
     [JsonPropertyName("MaxJatekos")] public int MaxPlayers { get; set; } = 6;
     [JsonPropertyName("Botok")] public bool Bots { get; set; } = false;

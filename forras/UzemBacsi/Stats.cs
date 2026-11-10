@@ -19,6 +19,7 @@ public class PlayerStat
 public partial class UzemBacsi
 {
     private Dictionary<ulong, PlayerStat> _stats = new();
+    private readonly Dictionary<int, int> _streak = new();
     private bool _statsDirty;
 
     private string StatsPath => Path.GetFullPath(Path.Combine(ModuleDirectory, "..", "..", "configs", "plugins",
@@ -89,10 +90,28 @@ public partial class UzemBacsi
         var victim = ev.Userid;
         if (victim != null && victim.IsValid) Server.NextFrame(() => { if (victim.IsValid) SendDeathReport(victim); });
 
-        if (!Config.Stats.Enabled || IsWarmup()) return HookResult.Continue;
-
         var attacker = ev.Attacker;
         var assister = ev.Assister;
+
+        if (victim != null && victim.IsValid) _streak[victim.Slot] = 0;
+        if (Config.Streak.Enabled && Config.Streak.Kills > 0 && attacker != null && attacker.IsValid
+            && victim != null && attacker != victim && attacker.Team != victim.Team)
+        {
+            _streak.TryGetValue(attacker.Slot, out var n);
+            _streak[attacker.Slot] = ++n;
+            if (n % Config.Streak.Kills == 0)
+            {
+                var a = attacker;
+                Server.NextFrame(() =>
+                {
+                    if (!a.IsValid || !a.PawnIsAlive) return;
+                    a.GiveNamedItem(Config.Streak.Reward);
+                    Tell(a, $"{{gold}}{n} ölés halál nélkül!{{default}} Kaptál egy {{lime}}injekciót{{default}}.");
+                });
+            }
+        }
+
+        if (!Config.Stats.Enabled || IsWarmup()) return HookResult.Continue;
 
         var vs = victim != null ? TouchStats(victim) : null;
         if (vs != null) vs.Deaths++;

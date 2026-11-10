@@ -10,7 +10,7 @@ namespace UzemBacsi;
 public partial class UzemBacsi : BasePlugin, IPluginConfig<UzemConfig>
 {
     public override string ModuleName => "UzemBacsi";
-    public override string ModuleVersion => "1.4.0";
+    public override string ModuleVersion => "1.5.0";
     public override string ModuleAuthor => "Üzem-Bácsi";
 
     public UzemConfig Config { get; set; } = new();
@@ -48,6 +48,11 @@ public partial class UzemBacsi : BasePlugin, IPluginConfig<UzemConfig>
         RegisterEventHandler<EventPlayerSpawn>(OnSpawn);
         RegisterEventHandler<EventPlayerHurt>(OnPlayerHurt);
         RegisterEventHandler<EventPlayerDeath>(OnPlayerDeath);
+        RegisterEventHandler<EventPlayerDisconnect>((ev, _) =>
+        {
+            if (ev.Userid != null && ev.Userid.IsValid) _streak.Remove(ev.Userid.Slot);
+            return HookResult.Continue;
+        });
 
         AddCommandListener("say", OnSay);
         AddCommandListener("say_team", OnSayTeam);
