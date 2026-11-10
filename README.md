@@ -13,7 +13,7 @@ a Steamről tölti le.
 |---|---|---|
 | `metamod` | Metamod:Source | 2.0.0-git1469 |
 | `counterstrikesharp` | CounterStrikeSharp, .NET-tel együtt | 1.0.378 |
-| `counterstrikesharp/plugins/UzemBacsi` | saját plugin: bhop, ejtőernyő, shotgun tiltás, hirdetés, rang, sebzés, chat tagek, !def, !norecoil, injekció sorozatért, max 6 játékos | 1.5.0 |
+| `counterstrikesharp/plugins/UzemBacsi` | saját plugin: bhop, ejtőernyő, shotgun tiltás, hirdetés, rang, sebzés, chat tagek, !def, !norecoil, injekció sorozatért, max 6 játékos | 1.5.1 |
 | `counterstrikesharp/plugins/WeaponPaints` | skinek (`!ws`, `!skins`, `!knife`...), magyar szövegekkel | build-466 |
 | `counterstrikesharp/plugins/MenuManagerCore` + `PlayerSettings` + `shared/AnyBaseLib` | a menükhöz kellenek | 1.4.1 / 0.9.4 / 0.9.4 |
 | `counterstrikesharp/plugins/CS2-SimpleAdmin` | admin parancsok (`!admin`, `!kick`, `!ban`, `!map`...) | 1.9.1 |
@@ -41,7 +41,7 @@ A repóban csak olyan fájl van, amihez a szerver futás közben nem nyúl. A pl
 - **`!def`:** CT-ként a bomba mellett (max 100 egység) azonnal hatástalanít, ha már nincs élő terrorista.
   Ha nincs élő T, az E-vel kezdett hatástalanítás is azonnal kész.
 - **Injekció:** 4 ölés halál nélkül = egy injekció (healthshot), aztán minden további 4 után újabb.
-- **`!norecoil` (csak admin):** mindenkinek ki/be kapcsolja a fegyverek visszarúgását.
+- **`!norecoil` (csak admin):** mindenkinek ki/be kapcsolja a fegyverek visszarúgását. Az üzenetet csak az adminok látják.
 - **Admin és VIP tag:** a chatben `[ADMIN]` (piros) vagy `[VIP]` (arany) a név előtt, és a pontozótáblán is.
   Admin: aki `@css/generic` vagy `@css/root` jogot kapott. VIP: `@css/vip` vagy `@css/reservation`.
 - **Max 6 játékos:** a 7. belépőt kirúgja („A szerver tele van”). Aki `@css/reservation` jogot kapott (VIP), az beléphet.

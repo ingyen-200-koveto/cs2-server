@@ -4,6 +4,7 @@
 #  - WeaponPaints: adatbazis adatok a weboldal config.php-jabol, magyar skinnevek, weboldal link
 #  - WeaponPaints: !ws es !skins = jatekon beluli menu, !web = weboldal link
 #  - CounterStrikeSharp: a ! parancsok nem latszanak a chatben
+#  - SimpleAdmin: az admin parancsok uzeneteit (pl. noclip) csak az adminok latjak
 #  - server.cfg: sv_hibernate_when_empty 0
 #  - a vegen ujrainditja a szervert
 set -euo pipefail
@@ -15,6 +16,7 @@ WEBSITE="http://79.172.222.68:8080"
 WP="/game/csgo/addons/counterstrikesharp/configs/plugins/WeaponPaints/WeaponPaints.json"
 CORE="/game/csgo/addons/counterstrikesharp/configs/core.json"
 SCFG="/game/csgo/cfg/server.cfg"
+SA="/game/csgo/addons/counterstrikesharp/configs/plugins/CS2-SimpleAdmin/CS2-SimpleAdmin.json"
 
 read -rsp "SRKHost API kulcs (ptlc_...): " KEY; echo
 [[ -z "$KEY" ]] && { echo "Nem adtal meg kulcsot."; exit 1; }
@@ -73,6 +75,15 @@ php "$TMP/edit.php" "$TMP/core.json" \
   FollowCS2ServerGuidelines 'false'
 put "$CORE" "$TMP/core.json"
 echo "    kesz"
+
+echo "==> CS2-SimpleAdmin.json (admin uzenetek csak adminoknak)"
+if get "$SA" > "$TMP/sa.json" 2>/dev/null; then
+  php "$TMP/edit.php" "$TMP/sa.json" ShowActivityType '3'
+  put "$SA" "$TMP/sa.json"
+  echo "    kesz"
+else
+  echo "    nem talalom a SimpleAdmin configot, kihagyom"
+fi
 
 echo "==> server.cfg (sv_hibernate_when_empty 0)"
 get "$SCFG" > "$TMP/server.cfg" 2>/dev/null || : > "$TMP/server.cfg"

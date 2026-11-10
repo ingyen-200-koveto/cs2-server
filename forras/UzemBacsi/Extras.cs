@@ -26,7 +26,10 @@ public partial class UzemBacsi
         }
         _noRecoil = !_noRecoil;
         ApplyRecoil();
-        Say(_noRecoil ? "{lime}Visszarúgás KIKAPCSOLVA{default} mindenkinek." : "{red}Visszarúgás visszakapcsolva.");
+        var msg = _noRecoil ? "{lime}Visszarúgás KIKAPCSOLVA{default} mindenkinek." : "{red}Visszarúgás visszakapcsolva.";
+        foreach (var p in Utilities.GetPlayers())
+            if (IsHuman(p) && (AdminManager.PlayerHasPermissions(p, "@css/generic") || AdminManager.PlayerHasPermissions(p, "@css/root")))
+                Tell(p, msg);
     }
 
     private void OnDefuse(CCSPlayerController? player, CommandInfo cmd)

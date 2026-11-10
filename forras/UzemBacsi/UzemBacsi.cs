@@ -10,7 +10,7 @@ namespace UzemBacsi;
 public partial class UzemBacsi : BasePlugin, IPluginConfig<UzemConfig>
 {
     public override string ModuleName => "UzemBacsi";
-    public override string ModuleVersion => "1.5.0";
+    public override string ModuleVersion => "1.5.1";
     public override string ModuleAuthor => "Üzem-Bácsi";
 
     public UzemConfig Config { get; set; } = new();
