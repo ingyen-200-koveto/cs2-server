@@ -13,7 +13,7 @@ a Steamről tölti le.
 |---|---|---|
 | `metamod` | Metamod:Source | 2.0.0-git1469 |
 | `counterstrikesharp` | CounterStrikeSharp, .NET-tel együtt | 1.0.378 |
-| `counterstrikesharp/plugins/UzemBacsi` | saját plugin: bhop, ejtőernyő, shotgun tiltás, hirdetés, rang, sebzés, chat tagek, !def, !norecoil, injekció sorozatért, pályaszavazás, troll parancsok, max 6 játékos | 1.7.0 |
+| `counterstrikesharp/plugins/UzemBacsi` | saját plugin: bhop, ejtőernyő, shotgun tiltás, hirdetés, rang, sebzés, chat tagek, !def, !norecoil, injekció sorozatért, pályaszavazás, troll parancsok, max 6 játékos | 1.7.1 |
 | `counterstrikesharp/plugins/WeaponPaints` | skinek (`!ws`, `!skins`, `!knife`...), magyar szövegekkel | build-466 |
 | `counterstrikesharp/plugins/MenuManagerCore` + `PlayerSettings` + `shared/AnyBaseLib` | a menükhöz kellenek | 1.4.1 / 0.9.4 / 0.9.4 |
 | `counterstrikesharp/plugins/CS2-SimpleAdmin` | admin parancsok (`!admin`, `!kick`, `!ban`, `!map`...) | 1.9.1 |
@@ -45,7 +45,7 @@ A repóban csak olyan fájl van, amihez a szerver futás közben nem nyúl. A pl
   vagy ha a játékosok 60%-a beírja: `!rtv`. Szavazni a pálya számával lehet: `!1` ... `!7` (20 mp).
   Admin azonnal indíthatja: `!mapvote`. A `!palyak` kiírja a listát. Csak a szerveren meglévő pályák jelennek meg.
 - **Troll parancsok (csak admin, az üzenetet csak te látod):** `!troll` (lista), `!rocket`, `!drunk`, `!spin`,
-  `!bury` / `!unbury`, `!blind`, `!drop`, `!csirke`, `!lathatatlan`, `!fakeban`.
+  `!bury` / `!unbury`, `!blind`, `!drop`, `!csirke`, `!chicken` (csirke modell, magadra is: sima `!chicken`), `!lathatatlan`, `!fakeban`.
   Cél: név (részlet is jó), `@all`, `@ct`, `@t`, `@me`. Például: `!rocket pisti`, `!csirke @all`.
 - **`!norecoil` (csak admin):** mindenkinek ki/be kapcsolja a fegyverek visszarúgását. Az üzenetet csak az adminok látják.
 - **Admin és VIP tag:** a chatben `[ADMIN]` (piros) vagy `[VIP]` (arany) a név előtt, és a pontozótáblán is.

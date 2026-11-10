@@ -11,13 +11,30 @@ namespace UzemBacsi;
 public partial class UzemBacsi
 {
     private readonly HashSet<int> _invisible = new();
+    private readonly Dictionary<int, string> _chickenOriginal = new();
+    private const string ChickenModel = "models/chicken/chicken.vmdl";
+
+    private void ToggleChicken(CCSPlayerController t)
+    {
+        if (!t.PawnIsAlive) return;
+        var pawn = t.PlayerPawn.Value!;
+        if (_chickenOriginal.TryGetValue(t.Slot, out var orig))
+        {
+            _chickenOriginal.Remove(t.Slot);
+            if (!string.IsNullOrEmpty(orig)) pawn.SetModel(orig);
+            return;
+        }
+        var current = pawn.CBodyComponent?.SceneNode?.GetSkeletonInstance()?.ModelState.ModelName ?? "";
+        _chickenOriginal[t.Slot] = current;
+        pawn.SetModel(ChickenModel);
+    }
 
     private void RegisterTroll()
     {
         AddCommand("css_troll", "Troll parancsok listája", (p, _) =>
         {
             if (!IsTrollAdmin(p)) return;
-            Tell(p!, "{gold}Troll parancsok:{default} !rocket, !drunk, !spin, !bury, !unbury, !blind, !drop, !csirke, !lathatatlan, !fakeban");
+            Tell(p!, "{gold}Troll parancsok:{default} !rocket, !drunk, !spin, !bury, !unbury, !blind, !drop, !csirke, !chicken, !lathatatlan, !fakeban");
             p!.PrintToChat(Colors(" Cél: név (részlet is jó), {lime}@all{default}, {lime}@ct{default}, {lime}@t{default}, {lime}@me"));
         });
 
@@ -97,6 +114,40 @@ public partial class UzemBacsi
                 c.Teleport(new Vector(pos.X + (float)Math.Cos(ang) * 60, pos.Y + (float)Math.Sin(ang) * 60, pos.Z + 10), null, null);
                 c.DispatchSpawn();
             }
+        });
+
+        RegisterListener<Listeners.OnServerPrecacheResources>(m => m.AddResource(ChickenModel));
+        AddCommand("css_chicken", "Csirkévé változtat (admin)", (p, cmd) =>
+        {
+            if (!IsTrollAdmin(p)) return;
+            if (cmd.ArgCount < 2)
+            {
+                if (p == null) return;
+                ToggleChicken(p);
+                Tell(p, _chickenOriginal.ContainsKey(p.Slot) ? "Csirke lettél! 🐔 (újra !chicken = vissza)" : "Visszaváltoztál emberré.");
+                return;
+            }
+            var targets = cmd.GetArgTargetResult(1).Players.Where(x => x.IsValid && !x.IsHLTV).ToList();
+            foreach (var t in targets) ToggleChicken(t);
+            if (p != null) Tell(p, "{gold}!chicken{default}: " + string.Join(", ", targets.Select(t => t.PlayerName)));
+        });
+        RegisterEventHandler<EventPlayerSpawn>((ev, _) =>
+        {
+            var t = ev.Userid;
+            if (t != null && t.IsValid && _chickenOriginal.ContainsKey(t.Slot))
+                AddTimer(0.2f, () =>
+                {
+                    if (!t.IsValid || !t.PawnIsAlive) return;
+                    var pawn = t.PlayerPawn.Value!;
+                    _chickenOriginal[t.Slot] = pawn.CBodyComponent?.SceneNode?.GetSkeletonInstance()?.ModelState.ModelName ?? "";
+                    pawn.SetModel(ChickenModel);
+                });
+            return HookResult.Continue;
+        });
+        RegisterEventHandler<EventPlayerDisconnect>((ev, _) =>
+        {
+            if (ev.Userid != null) _chickenOriginal.Remove(ev.Userid.Slot);
+            return HookResult.Continue;
         });
 
         Troll("css_lathatatlan", "Láthatatlanná teszi / visszaállítja", (p, t) =>
