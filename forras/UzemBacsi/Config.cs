@@ -86,6 +86,31 @@ public class StreakConfig
     [JsonPropertyName("Jutalom")] public string Reward { get; set; } = "weapon_healthshot";
 }
 
+public class MapEntry
+{
+    [JsonPropertyName("Nev")] public string Name { get; set; } = "";
+    [JsonPropertyName("Palya")] public string Map { get; set; } = "";
+}
+
+public class VoteConfig
+{
+    [JsonPropertyName("Bekapcsolva")] public bool Enabled { get; set; } = true;
+    [JsonPropertyName("SzavazasIdeje")] public float Seconds { get; set; } = 20f;
+    [JsonPropertyName("MeccsVegenSzavazas")] public bool AtMatchEnd { get; set; } = true;
+    [JsonPropertyName("RtvArany")] public double RtvRatio { get; set; } = 0.6;
+    [JsonPropertyName("RtvVarakozasMasodperc")] public int RtvDelaySeconds { get; set; } = 60;
+    [JsonPropertyName("Palyak")] public List<MapEntry> Maps { get; set; } = new()
+    {
+        new() { Name = "Mirage", Map = "de_mirage" },
+        new() { Name = "Dust II", Map = "de_dust2" },
+        new() { Name = "Inferno", Map = "de_inferno" },
+        new() { Name = "Nuke", Map = "de_nuke" },
+        new() { Name = "Ancient", Map = "de_ancient" },
+        new() { Name = "Anubis", Map = "de_anubis" },
+        new() { Name = "Cache", Map = "de_cache" },
+    };
+}
+
 public class UzemConfig : BasePluginConfig
 {
     [JsonPropertyName("Elotag")] public string Prefix { get; set; } = "{lightblue}[Üzem-Bácsi]{default}";
@@ -101,6 +126,7 @@ public class UzemConfig : BasePluginConfig
     [JsonPropertyName("Sebzes")] public DamageConfig Damage { get; set; } = new();
     [JsonPropertyName("Cimkek")] public TagConfig Tags { get; set; } = new();
     [JsonPropertyName("Statisztika")] public StatsConfig Stats { get; set; } = new();
+    [JsonPropertyName("Szavazas")] public VoteConfig Vote { get; set; } = new();
     [JsonPropertyName("Sorozat")] public StreakConfig Streak { get; set; } = new();
     [JsonPropertyName("Hatastalanitas")] public DefuseConfig Defuse { get; set; } = new();
     [JsonPropertyName("MaxJatekos")] public int MaxPlayers { get; set; } = 6;

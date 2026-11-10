@@ -10,7 +10,7 @@ namespace UzemBacsi;
 public partial class UzemBacsi : BasePlugin, IPluginConfig<UzemConfig>
 {
     public override string ModuleName => "UzemBacsi";
-    public override string ModuleVersion => "1.5.1";
+    public override string ModuleVersion => "1.6.0";
     public override string ModuleAuthor => "Üzem-Bácsi";
 
     public UzemConfig Config { get; set; } = new();
@@ -66,6 +66,7 @@ public partial class UzemBacsi : BasePlugin, IPluginConfig<UzemConfig>
         AddCommand("css_norecoil", "Visszarúgás ki/be (admin)", OnNoRecoil);
         RegisterEventHandler<EventBombBegindefuse>(OnBeginDefuse);
 
+        RegisterVote();
         StartAds();
         ApplyCvars();
     }
@@ -137,6 +138,8 @@ public partial class UzemBacsi : BasePlugin, IPluginConfig<UzemConfig>
         {
             Server.ExecuteCommand("mp_match_end_restart 1");
             Server.ExecuteCommand("mp_match_end_changelevel 0");
+            if (Config.Vote.Enabled && Config.Vote.AtMatchEnd)
+                Server.ExecuteCommand($"mp_match_restart_delay {(int)Config.Vote.Seconds + 10}");
         }
 
         ApplyRecoil();
