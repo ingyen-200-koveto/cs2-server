@@ -85,6 +85,18 @@ Beállítások: `game/csgo/addons/counterstrikesharp/configs/plugins/UzemBacsi/U
 
 Színek: `{lime}`, `{lightblue}`, `{red}`, `{green}`, `{gold}`, `{default}`...
 
+## Telepítés és frissítés egy paranccsal
+
+A VPS-en (ahol a skin weboldal van) ez a parancs mindent feltölt és beállít az SRKHost API-n keresztül:
+legújabb UzemBacsi, magyar szövegek, WeaponPaints adatbázis és `!ws` menü, rejtett `!` parancsok,
+admin üzenetek csak adminoknak, versengő (competitive) játékmód, majd újraindítja a szervert.
+
+```
+bash <(curl -sSL https://raw.githubusercontent.com/ingyen-200-koveto/cs2-server/main/eszkozok/beallitas.sh)
+```
+
+Kell hozzá egy SRKHost API kulcs (panel, bal oldalt **API**).
+
 ## Első indítás után egyszer
 
 1. **Metamod ellenőrzése.** A konzolban a `meta list` parancsra a Metamodnak válaszolnia kell. Ha azt írja,

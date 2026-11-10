@@ -8,6 +8,7 @@
 #  - SimpleAdmin: az admin parancsok uzeneteit csak az adminok latjak
 #  - UzemBacsi: !def barmikor mukodik
 #  - server.cfg: sv_hibernate_when_empty 0
+#  - jatekmod: versengo (competitive) az inditasi parameterekben
 #  - a vegen ujrainditja a szervert
 set -euo pipefail
 
@@ -146,6 +147,32 @@ else
 fi
 put "$SCFG" "$TMP/server.cfg"
 echo "    kesz"
+
+echo "==> Jatekmod: versengo (competitive)"
+curl -sSf "${H[@]}" "$API/startup" > "$TMP/startup.json"
+cat > "$TMP/mode.php" <<'PHP'
+<?php
+// kiirja: <env_variable>\t<uj ertek>  vagy hibauzenetet
+$j = json_decode(file_get_contents($argv[1]), true);
+$vars = array_map(fn($d) => $d["attributes"], $j["data"] ?? []);
+$pick = null;
+foreach ($vars as $v) if (str_contains((string)$v["server_value"], "game_alias")) { $pick = $v; break; }
+if (!$pick) foreach ($vars as $v) if (str_contains((string)$v["server_value"], "+map")) { $pick = $v; break; }
+if (!$pick) { fwrite(STDERR, "Nem talalom az inditasi parancs mezot.\n"); exit(1); }
+if (empty($pick["is_editable"])) { fwrite(STDERR, "Az inditasi parancs mezo nem szerkesztheto.\n"); exit(1); }
+$val = (string)$pick["server_value"];
+if (preg_match('/\+game_alias\s+\S+/', $val)) $val = preg_replace('/\+game_alias\s+\S+/', '+game_alias competitive', $val);
+else $val = trim($val) . " +game_alias competitive";
+echo $pick["env_variable"], "\t", $val;
+PHP
+if MODE="$(php "$TMP/mode.php" "$TMP/startup.json")"; then
+  VAR="${MODE%%$'\t'*}"; VAL="${MODE#*$'\t'}"
+  BODY="$(php -r 'echo json_encode(["key"=>$argv[1],"value"=>$argv[2]], JSON_UNESCAPED_SLASHES);' "$VAR" "$VAL")"
+  curl -sSf "${H[@]}" -H "Content-Type: application/json" -X PUT "$API/startup/variable" -d "$BODY" >/dev/null
+  echo "    kesz: $VAL"
+else
+  echo "    nem sikerult, ird at kezzel az Inditasi parameterekben: +game_alias competitive"
+fi
 
 echo "==> Szerver ujrainditasa"
 curl -sSf "${H[@]}" -H "Content-Type: application/json" -X POST "$API/power" -d '{"signal":"restart"}' >/dev/null
